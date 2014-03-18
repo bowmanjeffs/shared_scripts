@@ -12,12 +12,14 @@ the earliest end position.  it will
 
 python filter_seqs_2.py <file in>
 
+v5 allows sequences in alignment to take up multiple lines
+
 """
 import re
 import sys
 
 file_in = sys.argv[1]
-#file_in = 'test.fasta'  ## use this for testing
+#file_in = 'DUF900_pro_aligned.fasta'  ## use this for testing
 name = re.sub('.fasta', '', file_in)
 log = open(name+'.filter.log', 'w')
 
@@ -43,29 +45,56 @@ print >> log, 'filtering to last start and first end'
 l = 0
 
 with open(file_in, 'r') as fasta_in:
+    lines = ''
     for line in fasta_in:
         
         if line.startswith('>') == False:
             line = line.rstrip()
-            rline = line[::-1]
+            lines = lines + line
             
+        else:
             l = l + 1
-            
-            for i,p in enumerate(line):
-                if p not in gap_character:
-                    start = i - 1
-                    break
-                    
-            for i,p in enumerate(rline):
-                if p not in gap_character:
-                    end = len(rline) - i
-                    break
-                            
-            print l, start, end
-            print >> log, l, start, end
-            start_end[l] = start, end
-            starts.add(start)
-            ends.add(end)
+            if l != 1:
+                rlines = lines[::-1]
+                
+                l = l + 1
+                
+                for i,p in enumerate(lines):
+                    if p not in gap_character:
+                        start = i - 1
+                        break
+                        
+                for i,p in enumerate(rlines):
+                    if p not in gap_character:
+                        end = len(rlines) - i
+                        break
+                                
+                print l, start, end
+                print >> log, l, start, end
+                start_end[l] = start, end
+                starts.add(start)
+                ends.add(end)
+                lines = ''
+
+## make sure you get the last line!
+
+l = l + 1
+
+for i,p in enumerate(lines):
+    if p not in gap_character:
+        start = i - 1
+        break
+        
+for i,p in enumerate(rlines):
+    if p not in gap_character:
+        end = len(rlines) - i
+        break
+                
+print l, start, end
+print >> log, l, start, end
+start_end[l] = start, end
+starts.add(start)
+ends.add(end)
             
 min_end = min(ends)
 max_start = max(starts)   
@@ -99,29 +128,52 @@ gap = {}
        
 with open(file_in, 'r') as fasta_in:
     nseq = 0
+    lines = ''
     for line in fasta_in:
         
         if line.startswith('>') == False:
             line = line.rstrip()
-            
+            lines = lines + line
+        
+        else:
             nseq = nseq + 1
-            if nseq not in bad:
-                print nseq
+            if nseq != 1:
+            
+                nseq = nseq + 1
+                if nseq not in bad:
+                    print nseq
+                    
+                    for i,p in enumerate(lines):
+                        if p in gap_character:
+                            try:
+                                temp = gap[i]
+                                temp = temp + 1
+                                gap[i] = temp
+                            except KeyError:
+                                gap[i] = 1
+                lines = ''
                 
-                for i,p in enumerate(line):
-                    if p in gap_character:
-                        try:
-                            temp = gap[i]
-                            temp = temp + 1
-                            gap[i] = temp
-                        except KeyError:
-                            gap[i] = 1
+nseq = nseq + 1
+if nseq != 1:
+
+    nseq = nseq + 1
+    if nseq not in bad:
+        print nseq
+        
+        for i,p in enumerate(lines):
+            if p in gap_character:
+                try:
+                    temp = gap[i]
+                    temp = temp + 1
+                    gap[i] = temp
+                except KeyError:
+                    gap[i] = 1
                             
 ## generate filter and remove gaps
                     
 flter = {}
 
-for key in range(0, len(line)):
+for key in range(0, len(lines)):
     if key < max_start:
         flter[key] = 0
     elif key > min_end:
