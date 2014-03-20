@@ -24,7 +24,7 @@ name = re.sub('.fasta', '', file_in)
 log = open(name+'.filter.log', 'w')
 
 gap_character = ['-', '.']
-min_positions = 100 ## minimum positions allowed after filtering
+min_positions = 500 ## minimum positions allowed after filtering
 
 for character in gap_character:
     print >> log, 'gap = '+character
@@ -214,6 +214,7 @@ with open(file_in, 'r') as fasta_in, open(name+'.filter.fasta', 'w') as fasta_ou
             if l not in bad:
                 line = line.rstrip('\n')
                 seq = seq + line
+    print >> fasta_out, seq_out
                 
 print >> log, '\n'
 print >> log, 'filter:'
