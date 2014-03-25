@@ -181,13 +181,14 @@ if seqname not in bad:
                             
 ## determine which positions are used
                     
-p_use = set()
-
 for i in range(0, max(ends)):
-    if i >= max_start:
-        if i <= min_end:
-            if gap[i] < (len(start_end.keys()) - len(bad)):
-                p_use.add(i)
+        if i >= max_start:
+            if i <= min_end:
+                try:
+                    if gap[i] < (len(start_end.keys()) - len(bad)):
+                        p_use.add(i)
+                except KeyError:
+                    p_use.add(i)
             
 with open(file_in, 'r') as fasta_in, open(name+'.filter.fasta', 'w') as fasta_out:
     seq = ''
@@ -222,6 +223,13 @@ with open(file_in, 'r') as fasta_in, open(name+'.filter.fasta', 'w') as fasta_ou
         elif keep == True:
             line = line.rstrip()
             seq = seq + line
+			
+    if keep == True:
+        print seqname, 'generating filtered seq'
+        for i,p in enumerate(seq):
+            if i in p_use:
+                seq_out = seq_out + p
+        print >> fasta_out, seq_out
                 
 print >> log, '\n'
 print >> log, 'filter:'
