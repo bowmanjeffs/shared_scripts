@@ -10,7 +10,7 @@ characters and the minimum number of positions.
 The script will remove all positions before the last start position and after
 the earliest end position.  it will 
 
-python filter_seqs_2.py <file in>
+python filter_seqs_X.py <file in>
 
 v5 allows sequences in alignment to take up multiple lines
 
